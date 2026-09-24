@@ -54,4 +54,4 @@ maitri/
 ├── run_emergency_sim.py          # Automated mission scenario execution & verification suite
 └── requirements.txt              # Zero-cloud offline dependencies
 ```
-risk.
+
