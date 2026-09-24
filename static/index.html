@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAITRI | ISRO Astronaut AI | BAS-ORBIT-01</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #030810;
+      --panel: rgba(7, 15, 32, 0.88);
+      --cyan: #00f0ff;
+      --blue: #0066ff;
+      --green: #00ff88;
+      --yellow: #ffcc00;
+      --orange: #ff8800;
+      --red: #ff2255;
+      --purple: #aa33ff;
+      --dim: #4a6a8a;
+      --text: #d0e8f8;
+      --mono: 'JetBrains Mono', monospace;
+      --hud: 'Orbitron', sans-serif;
+      --raj: 'Rajdhani', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 60% at 15% 10%, rgba(0,240,255,0.10) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 50% at 85% 90%, rgba(0,102,255,0.08) 0%, transparent 50%),
+        repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,240,255,0.012) 3px, rgba(0,240,255,0.012) 4px);
+      color: var(--text);
+      font-family: var(--raj);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── TOP HEADER ──────────────────────────────── */
+    header {
+      background: rgba(4, 10, 22, 0.96);
+      border-bottom: 1px solid rgba(0,240,255,0.25);
+      box-shadow: 0 2px 24px rgba(0,240,255,0.18);
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      backdrop-filter: blur(12px);
+      z-index: 50;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-logo {
+      width: 38px; height: 38px;
+      border: 2px solid var(--cyan);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 0 12px var(--cyan);
+      animation: logo-pulse 2s infinite;
+    }
+    @keyframes logo-pulse {
+      0%,100%{box-shadow:0 0 10px var(--cyan)} 50%{box-shadow:0 0 22px var(--cyan)}
+    }
+    .brand-name { font-family: var(--hud); font-size: 22px; font-weight: 900; color: var(--cyan); letter-spacing: 3px; text-shadow: 0 0 16px rgba(0,240,255,0.7); }
+    .brand-sub { font-size: 9px; color: var(--dim); letter-spacing: 2px; font-family: var(--mono); }
+
+    .header-mid { display: flex; gap: 28px; align-items: center; font-family: var(--mono); font-size: 11px; }
+    .hstat { display: flex; flex-direction: column; align-items: center; }
+    .hstat .lbl { color: var(--dim); font-size: 9px; }
+    .hstat .val { color: var(--cyan); font-weight: 700; letter-spacing: 1px; }
+
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    #utc-clock { font-family: var(--mono); font-size: 13px; color: var(--cyan); letter-spacing: 2px; text-shadow: 0 0 8px var(--cyan); }
+    #sys-badge { padding: 4px 12px; border-radius: 3px; font-family: var(--hud); font-size: 10px; font-weight: 700; letter-spacing: 1.5px; }
+
+    /* ── MAIN GRID ───────────────────────────────── */
+    main {
+      display: grid;
+      grid-template-columns: 340px 1fr 360px;
+      gap: 12px;
+      padding: 12px;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── PANELS ──────────────────────────────────── */
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(0,240,255,0.18);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      backdrop-filter: blur(18px);
+      overflow-y: auto;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
+      position: relative;
+      transition: border-color 0.3s;
+    }
+    .panel:hover { border-color: rgba(0,240,255,0.38); }
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 20px; right: 20px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      opacity: 0.5;
+    }
+
+    .ph { /* Panel Header */
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(0,240,255,0.12);
+    }
+    .ph-title { font-family: var(--hud); font-size: 11px; letter-spacing: 2px; color: var(--cyan); display: flex; align-items: center; gap: 8px; }
+    .ph-icon { font-size: 16px; }
+
+    /* ── BADGE ───────────────────────────────────── */
+    .badge { padding: 3px 10px; border-radius: 3px; font-family: var(--hud); font-size: 9px; font-weight: 700; letter-spacing: 1.2px; }
+    .badge-G { background: rgba(0,255,136,0.12); border: 1px solid var(--green); color: var(--green); }
+    .badge-Y { background: rgba(255,204,0,0.12); border: 1px solid var(--yellow); color: var(--yellow); }
+    .badge-O { background: rgba(255,136,0,0.12); border: 1px solid var(--orange); color: var(--orange); }
+    .badge-R { background: rgba(255,34,85,0.18); border: 1px solid var(--red); color: var(--red); animation: blink .7s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* ── CAM & VIDEO ─────────────────────────────── */
+    .cam-wrap {
+      position: relative;
+      width: 100%; height: 200px;
+      background: #000;
+      border-radius: 6px;
+      border: 1px solid rgba(0,240,255,0.35);
+      overflow: hidden;
+      box-shadow: inset 0 0 20px rgba(0,240,255,0.1);
+    }
+    #webcam-video { width: 100%; height: 100%; object-fit: cover; display: block; }
+    #overlay-canvas { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+    .scanline { position: absolute; top: 0; left:0; width:100%; height:2px; background: linear-gradient(90deg,transparent,var(--cyan),transparent); opacity:0.55; animation: scan 3.5s linear infinite; pointer-events:none; }
+    @keyframes scan { 0%{top:0} 100%{top:100%} }
+    .cam-label { position: absolute; top:8px; left:8px; font-family:var(--mono); font-size:9px; color:var(--green); background:rgba(0,0,0,0.7); padding:2px 7px; border-radius:3px; border:1px solid rgba(0,255,136,0.3); }
+    .cam-corner { position:absolute; width:14px; height:14px; border-color:var(--cyan); border-style:solid; }
+    .cam-corner.tl { top:6px;left:6px; border-width:2px 0 0 2px; }
+    .cam-corner.tr { top:6px;right:6px; border-width:2px 2px 0 0; }
+    .cam-corner.bl { bottom:6px;left:6px; border-width:0 0 2px 2px; }
+    .cam-corner.br { bottom:6px;right:6px; border-width:0 2px 2px 0; }
+
+    /* ── BUTTONS ─────────────────────────────────── */
+    .btn { background:rgba(0,240,255,0.07); border:1px solid rgba(0,240,255,0.45); color:var(--cyan); padding:7px 12px; border-radius:4px; font-family:var(--hud); font-size:10px; letter-spacing:1px; cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:6px; justify-content:center; flex-shrink:0; }
+    .btn:hover { background:var(--cyan); color:#000; box-shadow:0 0 16px var(--cyan); }
+    .btn.red { border-color:var(--red); color:var(--red); background:rgba(255,34,85,0.1); }
+    .btn.red:hover { background:var(--red); color:#fff; box-shadow:0 0 16px var(--red); }
+    .btn.green { border-color:var(--green); color:var(--green); background:rgba(0,255,136,0.1); }
+    .btn.green:hover { background:var(--green); color:#000; box-shadow:0 0 16px var(--green); }
+    .btn-row { display:flex; gap:8px; }
+
+    /* ── METRIC BARS ─────────────────────────────── */
+    .metric { display:flex; flex-direction:column; gap:4px; }
+    .metric .row { display:flex; justify-content:space-between; font-family:var(--mono); font-size:10.5px; }
+    .metric .key { color:var(--dim); }
+    .metric .mval { color:var(--cyan); font-weight:600; }
+    .track { height:5px; background:rgba(255,255,255,0.07); border-radius:3px; overflow:hidden; }
+    .fill { height:100%; border-radius:3px; transition:width .4s ease; }
+    .f-G { background:var(--green); box-shadow:0 0 5px var(--green); }
+    .f-Y { background:var(--yellow); box-shadow:0 0 5px var(--yellow); }
+    .f-O { background:var(--orange); box-shadow:0 0 5px var(--orange); }
+    .f-R { background:var(--red); box-shadow:0 0 5px var(--red); }
+
+    /* ── AWBI DIAL ───────────────────────────────── */
+    .awbi-wrap { display:flex; flex-direction:column; align-items:center; gap:8px; padding:12px; background:rgba(0,240,255,0.04); border:1px solid rgba(0,240,255,0.18); border-radius:8px; }
+    .awbi-svg-wrap { position:relative; width:160px; height:160px; }
+    #awbi-svg { width:160px; height:160px; transform:rotate(-90deg); }
+    .awbi-bg { fill:none; stroke:rgba(255,255,255,0.07); stroke-width:14; }
+    .awbi-arc { fill:none; stroke:var(--green); stroke-width:14; stroke-dasharray:439.82; stroke-dashoffset:44; stroke-linecap:round; filter:drop-shadow(0 0 8px var(--green)); transition:stroke-dashoffset .7s ease, stroke .4s ease; }
+    .awbi-center { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); display:flex; flex-direction:column; align-items:center; }
+    #awbi-score { font-family:var(--hud); font-size:38px; font-weight:900; color:var(--green); text-shadow:0 0 20px rgba(0,255,136,0.7); line-height:1; }
+    .awbi-lbl { font-family:var(--mono); font-size:9px; color:var(--dim); letter-spacing:2px; margin-top:2px; }
+    #awbi-pill { font-family:var(--hud); font-size:10px; letter-spacing:2px; padding:4px 16px; border-radius:12px; font-weight:700; }
+
+    /* ── STAT CARDS ──────────────────────────────── */
+    .stat-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+    .stat-card { background:rgba(0,0,0,0.4); border:1px solid rgba(0,240,255,0.15); border-radius:5px; padding:8px; }
+    .stat-card .slbl { font-family:var(--mono); font-size:8.5px; color:var(--dim); letter-spacing:1px; }
+    .stat-card .sval { font-family:var(--mono); font-size:18px; font-weight:700; line-height:1.2; }
+
+    /* ── AUDIO SECTION ───────────────────────────── */
+    .audio-section { display:flex; flex-direction:column; gap:6px; }
+    .audio-label-row { display:flex; justify-content:space-between; align-items:center; font-family:var(--mono); font-size:10px; }
+    #audio-canvas { width:100%; height:60px; background:#020812; border-radius:5px; border:1px solid rgba(0,240,255,0.2); display:block; }
+    .audio-stats { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; }
+    .audio-stat { background:rgba(0,0,0,0.4); border:1px solid rgba(0,240,255,0.12); border-radius:4px; padding:5px 8px; }
+    .audio-stat .aslbl { font-family:var(--mono); font-size:8px; color:var(--dim); }
+    .audio-stat .asval { font-family:var(--mono); font-size:13px; font-weight:700; color:var(--cyan); }
+    .mic-btn-row { display:flex; gap:8px; align-items:center; }
+
+    /* ── PROTOCOL / BREATHING ────────────────────── */
+    .protocol-box { background:rgba(0,102,255,0.07); border:1px solid rgba(0,102,255,0.3); border-radius:6px; padding:10px; }
+    .proto-title { font-family:var(--hud); font-size:10px; color:var(--cyan); letter-spacing:1.5px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; }
+    #proto-text { font-family:var(--mono); font-size:10.5px; color:#9abcd0; line-height:1.5; }
+    .breath-wrap { display:none; align-items:center; gap:16px; margin-top:8px; }
+    .breath-circle { width:52px; height:52px; border-radius:50%; background:rgba(0,240,255,0.2); border:2px solid var(--cyan); box-shadow:0 0 16px var(--cyan); animation:breath 16s ease-in-out infinite; }
+    @keyframes breath {
+      0%{transform:scale(1)} 25%{transform:scale(1.65)} 50%{transform:scale(1.65)} 75%{transform:scale(1)} 100%{transform:scale(1)}
+    }
+    #breath-phase { font-family:var(--hud); font-size:12px; color:var(--cyan); font-weight:700; }
+    .proto-btns { display:flex; gap:6px; }
+
+    /* ── CHAT ────────────────────────────────────── */
+    .chat-box { display:flex; flex-direction:column; background:rgba(0,0,0,0.45); border:1px solid rgba(0,240,255,0.18); border-radius:6px; overflow:hidden; height:195px; flex-shrink:0; }
+    #chat-msgs { flex:1; padding:10px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; font-family:var(--mono); font-size:11px; }
+    .msg { padding:7px 11px; border-radius:5px; max-width:88%; line-height:1.45; }
+    .msg-a { align-self:flex-end; background:rgba(0,102,255,0.22); border:1px solid rgba(0,102,255,0.5); color:#b5d4ff; }
+    .msg-m { align-self:flex-start; background:rgba(0,240,255,0.14); border:1px solid rgba(0,240,255,0.4); color:#d6f4ff; box-shadow:0 0 8px rgba(0,240,255,0.12); }
+    .chat-bar { display:flex; padding:7px; border-top:1px solid rgba(0,240,255,0.12); background:rgba(3,9,20,0.95); gap:7px; }
+    #chat-input { flex:1; background:rgba(0,0,0,0.6); border:1px solid rgba(0,240,255,0.28); color:#fff; padding:7px 11px; border-radius:4px; font-family:var(--mono); font-size:11px; }
+    #chat-input:focus { outline:none; border-color:var(--cyan); box-shadow:0 0 8px rgba(0,240,255,0.3); }
+
+    /* ── SCENARIOS ───────────────────────────────── */
+    .scenario-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .scn { padding:10px; border-radius:5px; cursor:pointer; background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.1); font-family:var(--raj); text-align:left; transition:all .2s; }
+    .scn strong { display:block; font-size:11px; margin-bottom:2px; }
+    .scn small { font-size:9.5px; color:var(--dim); }
+    .scn:hover { border-color:var(--cyan); background:rgba(0,240,255,0.1); box-shadow:0 0 10px rgba(0,240,255,0.15); }
+
+    /* ── CCSDS PACKET BOX ────────────────────────── */
+    .pkt-box { background:#020609; border:1px solid rgba(0,240,255,0.22); border-radius:5px; padding:10px; font-family:var(--mono); font-size:10px; }
+    .pkt-title { color:var(--cyan); font-weight:700; margin-bottom:5px; letter-spacing:1px; }
+    .pkt-row { display:flex; gap:6px; align-items:center; margin-bottom:2px; }
+    .pkt-key { color:var(--dim); min-width:72px; }
+
+    /* ── TELEMETRY LOG ───────────────────────────── */
+    #tele-log { background:#010507; border:1px solid rgba(0,240,255,0.18); border-radius:5px; padding:8px; font-family:var(--mono); font-size:9.5px; height:160px; overflow-y:auto; color:var(--green); line-height:1.45; flex-shrink:0; }
+    .log-w { color:var(--yellow); }
+    .log-r { color:var(--red); font-weight:700; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width:4px; }
+    ::-webkit-scrollbar-track { background:rgba(0,0,0,0.3); }
+    ::-webkit-scrollbar-thumb { background:rgba(0,240,255,0.3); border-radius:2px; }
+
+    /* divider label */
+    .sec-label { font-family:var(--hud); font-size:9px; letter-spacing:2px; color:var(--dim); margin-bottom:-4px; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════ HEADER ═══════════════════════ -->
+<header>
+  <div class="brand">
+    <div class="brand-logo">🌌</div>
+    <div>
+      <div class="brand-name">MAITRI</div>
+      <div class="brand-sub">MULTIMODAL AI · PSYCHOLOGICAL & PHYSICAL WELL-BEING · BHARATIYA ANTARIKSH STATION</div>
+    </div>
+  </div>
+
+  <div class="header-mid">
+    <div class="hstat"><span class="lbl">STATION</span><span class="val">BAS-ORBIT-01</span></div>
+    <div class="hstat"><span class="lbl">MISSION</span><span class="val">GAGANYAAN-C01</span></div>
+    <div class="hstat"><span class="lbl">CCSDS APID</span><span class="val" style="color:var(--yellow)">0x03A5</span></div>
+    <div class="hstat"><span class="lbl">ALTITUDE</span><span class="val">408 KM LEO</span></div>
+    <div class="hstat"><span class="lbl">LATENCY</span><span id="hdr-latency" class="val">-- ms</span></div>
+  </div>
+
+  <div class="header-right">
+    <span id="utc-clock">--:--:-- UTC</span>
+    <span id="sys-badge" class="badge badge-G">⬤ NOMINAL</span>
+    <button class="btn" id="btn-voice" style="padding:5px 10px;font-size:9px;">🔊 VOICE ON</button>
+  </div>
+</header>
+
+<!-- ═══════════════════════ MAIN GRID ═══════════════════════ -->
+<main>
+
+  <!-- ── LEFT: VISION & AUDIO ── -->
+  <div class="panel">
+    <div class="ph">
+      <div class="ph-title"><span class="ph-icon">👁</span> VISION & FATIGUE — M1</div>
+      <span id="cv-badge" class="badge badge-G">ACTIVE</span>
+    </div>
+
+    <!-- Camera Feed -->
+    <div class="cam-wrap">
+      <video id="webcam-video" autoplay playsinline muted></video>
+      <canvas id="overlay-canvas"></canvas>
+      <div class="scanline"></div>
+      <div class="cam-corner tl"></div>
+      <div class="cam-corner tr"></div>
+      <div class="cam-corner bl"></div>
+      <div class="cam-corner br"></div>
+      <div class="cam-label">CAM-01 · LIVE EDGE</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="btn-cam" style="flex:1">📷 START CAMERA</button>
+      <button class="btn" id="btn-sim-face">🔄 SIMULATE</button>
+    </div>
+
+    <!-- Vision Metrics -->
+    <div class="sec-label">FACIAL ANALYSIS</div>
+    <div class="metric">
+      <div class="row"><span class="key">EMOTION DETECTED</span><span class="mval" id="v-emotion">NEUTRAL (95%)</span></div>
+    </div>
+    <div class="metric">
+      <div class="row"><span class="key">EAR — EYE OPENNESS</span><span class="mval" id="v-ear">0.31</span></div>
+      <div class="track"><div class="fill f-G" id="bar-ear" style="width:78%"></div></div>
+    </div>
+    <div class="metric">
+      <div class="row"><span class="key">PERCLOS — EYE FATIGUE</span><span class="mval" id="v-perclos">2.0%</span></div>
+      <div class="track"><div class="fill f-G" id="bar-perclos" style="width:4%"></div></div>
+    </div>
+    <div class="metric">
+      <div class="row"><span class="key">MAR — YAWN DETECT</span><span class="mval" id="v-mar">0.16</span></div>
+      <div class="track"><div class="fill f-G" id="bar-mar" style="width:18%"></div></div>
+    </div>
+    <div class="metric">
+      <div class="row"><span class="key">MICRO-TENSION</span><span class="mval" id="v-tension">0.12</span></div>
+      <div class="track"><div class="fill f-G" id="bar-tension" style="width:12%"></div></div>
+    </div>
+    <div class="metric">
+      <div class="row"><span class="key">HEAD POSTURE</span><span class="mval" id="v-posture">STABLE · 0.0°</span></div>
+    </div>
+
+    <!-- Audio Section -->
+    <div class="ph" style="margin-top:4px;">
+      <div class="ph-title"><span class="ph-icon">🎙</span> VOICE ANALYSIS — M2</div>
+      <span id="audio-badge" class="badge badge-G">READY</span>
+    </div>
+    <div class="audio-section">
+      <div class="mic-btn-row">
+        <button class="btn" id="btn-mic-toggle" style="flex:1">🎙 START MIC ANALYSIS</button>
+        <button class="btn" id="btn-speak">🎤 SPEAK</button>
+      </div>
+      <div class="audio-label-row">
+        <span style="color:var(--dim);font-size:9px;">FREQUENCY SPECTRUM (LIVE)</span>
+        <span id="audio-emotion-tag" style="color:var(--cyan)">CALM</span>
+      </div>
+      <canvas id="audio-canvas"></canvas>
+      <div class="audio-stats">
+        <div class="audio-stat"><div class="aslbl">F0 PITCH</div><div class="asval" id="a-pitch">-- Hz</div></div>
+        <div class="audio-stat"><div class="aslbl">JITTER</div><div class="asval" id="a-jitter">--%</div></div>
+        <div class="audio-stat"><div class="aslbl">SHIMMER</div><div class="asval" id="a-shimmer">--%</div></div>
+        <div class="audio-stat"><div class="aslbl">VOCAL STRAIN</div><div class="asval" id="a-strain">--</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CENTER: AWBI + JARVIS ── -->
+  <div class="panel">
+    <div class="ph">
+      <div class="ph-title"><span class="ph-icon">🧠</span> WELL-BEING INDEX & JARVIS COMPANION</div>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--dim)" id="latency-tag">LATENCY — ms</span>
+    </div>
+
+    <!-- AWBI Radial Dial -->
+    <div class="awbi-wrap">
+      <div class="awbi-svg-wrap">
+        <svg id="awbi-svg" viewBox="0 0 160 160">
+          <circle class="awbi-bg" cx="80" cy="80" r="70"/>
+          <circle class="awbi-arc" id="awbi-arc" cx="80" cy="80" r="70"/>
+        </svg>
+        <div class="awbi-center">
+          <span id="awbi-score">93.4</span>
+          <span class="awbi-lbl">AWBI INDEX</span>
+        </div>
+      </div>
+      <div id="awbi-pill" class="badge badge-G">OPTIMAL EQUILIBRIUM</div>
+    </div>
+
+    <!-- 3 Stat Cards -->
+    <div class="stat-row">
+      <div class="stat-card"><div class="slbl">STRESS INDEX</div><div class="sval" id="s-stress" style="color:var(--cyan)">12.0</div></div>
+      <div class="stat-card"><div class="slbl">FATIGUE INDEX</div><div class="sval" id="s-fatigue" style="color:var(--yellow)">8.5</div></div>
+      <div class="stat-card"><div class="slbl">COGNITIVE LOAD</div><div class="sval" id="s-cogload" style="color:var(--green)">24.0</div></div>
+    </div>
+
+    <!-- Psychological Protocol Box -->
+    <div class="protocol-box">
+      <div class="proto-title">
+        <span id="proto-name">⚡ AUTONOMOUS MONITORING ACTIVE</span>
+        <div class="proto-btns">
+          <button class="btn" id="btn-breath" style="padding:3px 8px;font-size:9px">🫁 BOX BREATHING</button>
+          <button class="btn" id="btn-rebt" style="padding:3px 8px;font-size:9px">💡 REBT</button>
+          <button class="btn" id="btn-cbt" style="padding:3px 8px;font-size:9px">🧩 CBT</button>
+        </div>
+      </div>
+      <div id="proto-text">All physiological and psychological indicators nominal. MAITRI standing by on orbital watch.</div>
+      <div class="breath-wrap" id="breath-widget">
+        <div class="breath-circle"></div>
+        <div>
+          <div id="breath-phase" style="color:var(--cyan);font-weight:700;font-size:13px">INHALE (4s)</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:3px">Vagus nerve calming cycle active</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JARVIS Chat -->
+    <div class="sec-label">JARVIS COMPANION INTERFACE</div>
+    <div class="chat-box">
+      <div id="chat-msgs">
+        <div class="msg msg-m"><strong>MAITRI:</strong> Systems online, Commander. Multimodal monitoring is active. How are you feeling right now?</div>
+      </div>
+      <form id="chat-form" class="chat-bar">
+        <input type="text" id="chat-input" placeholder="Speak or type to MAITRI..." autocomplete="off">
+        <button type="submit" class="btn" style="padding:6px 14px">SEND</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── RIGHT: TELEMETRY & SCENARIOS ── -->
+  <div class="panel">
+    <div class="ph">
+      <div class="ph-title"><span class="ph-icon">📡</span> GROUND TELEMETRY — M5 (ISTRAC)</div>
+      <span id="ground-badge" class="badge badge-G">GREEN // NOMINAL</span>
+    </div>
+
+    <!-- Mission Scenarios -->
+    <div class="sec-label">MISSION SCENARIO SIMULATION</div>
+    <div class="scenario-grid">
+      <button class="scn" onclick="triggerScenario('A')"><strong style="color:var(--green)">[A] NOMINAL</strong><small>Routine orbit · calm crew</small></button>
+      <button class="scn" onclick="triggerScenario('B')"><strong style="color:var(--yellow)">[B] EVA FATIGUE</strong><small>Spacewalk stress · CBT</small></button>
+      <button class="scn" onclick="triggerScenario('C')"><strong style="color:var(--orange)">[C] SLEEP DEBT</strong><small>36h deprivation · ORANGE</small></button>
+      <button class="scn" onclick="triggerScenario('D')"><strong style="color:var(--red)">[D] HYPOXIA RED</strong><small>Critical O₂ · escalation</small></button>
+    </div>
+
+    <!-- CCSDS Packet Inspector -->
+    <div class="sec-label">CCSDS PACKET INSPECTOR (APID 0x03A5)</div>
+    <div class="pkt-box">
+      <div class="pkt-title">▸ SPACE PACKET ENCAPSULATION</div>
+      <div class="pkt-row"><span class="pkt-key">PACKET ID</span><span id="pkt-id" style="color:#fff;word-break:break-all">TLM-INIT-000001</span></div>
+      <div class="pkt-row"><span class="pkt-key">SEQ COUNT</span><span id="pkt-seq" style="color:var(--cyan)">001</span></div>
+      <div class="pkt-row"><span class="pkt-key">CRC-32</span><span id="pkt-crc" style="color:var(--green)">PENDING VERIFY</span></div>
+      <div class="pkt-row"><span class="pkt-key">HEX PAYLOAD</span><span id="pkt-hex" style="color:#6eb8ff;word-break:break-all;font-size:9px">—</span></div>
+      <div class="pkt-row" style="margin-top:4px">
+        <span class="pkt-key">DOWNLINK</span>
+        <span style="color:var(--dim)">ISTRAC-BLR-01 · 0.45s delay</span>
+      </div>
+    </div>
+
+    <!-- AWBI History Mini Chart -->
+    <div class="sec-label">AWBI TREND HISTORY</div>
+    <canvas id="awbi-history-canvas" style="width:100%;height:55px;background:#010507;border-radius:5px;border:1px solid rgba(0,240,255,0.15);display:block"></canvas>
+
+    <!-- Live Log -->
+    <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:9.5px;color:var(--dim)">
+      <span>ISTRAC DOWNLINK LOG</span>
+      <span id="pkt-count" style="color:var(--green)">0 PACKETS</span>
+    </div>
+    <div id="tele-log">
+      <div>[BOOT] MAITRI edge runtime initialising...</div>
+      <div>[BOOT] CCSDS APID 0x03A5 locked to ISTRAC ground station.</div>
+      <div>[BOOT] CBT / REBT psychological engine ready.</div>
+      <div>[BOOT] All subsystems nominal. Awaiting crew interaction.</div>
+    </div>
+  </div>
+
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
